@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tailoring Order Management System - Atelier Dashboard</title>
+  <meta name="description" content="A relational database front-end demonstration for tailoring businesses with due-date monitoring, order tracking, measurements, and staff management.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="app-sidebar" id="sidebar">
+    <div class="brand-section">
+      <div class="brand-logo-icon">✂️</div>
+      <div class="brand-info">
+        <h1>Sartorial Atelier</h1>
+        <p>Order Management</p>
+      </div>
+    </div>
+
+    <div class="nav-section-title">Operations</div>
+    <ul class="nav-list">
+      <li class="nav-item active" data-tab="orders">
+        <button type="button">
+          <span class="nav-icon">📦</span>
+          <span>Orders & Items</span>
+          <span class="sidebar-badge" id="badge-orders-due">1 Alert</span>
+        </button>
+      </li>
+      <li class="nav-item" data-tab="customers">
+        <button type="button">
+          <span class="nav-icon">👥</span>
+          <span>Customers & Sizing</span>
+        </button>
+      </li>
+      <li class="nav-item" data-tab="staff">
+        <button type="button">
+          <span class="nav-icon">🧵</span>
+          <span>Staff & Assignments</span>
+        </button>
+      </li>
+      <li class="nav-item" data-tab="payments">
+        <button type="button">
+          <span class="nav-icon">💳</span>
+          <span>Payments & Ledger</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="nav-section-title">Academic & Presentation</div>
+    <ul class="nav-list">
+      <li class="nav-item" data-tab="defense">
+        <button type="button">
+          <span class="nav-icon">🎓</span>
+          <span>Defense & SQL Guide</span>
+        </button>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <div class="presentation-chip" id="btn-quick-defense" title="Click to view Project Defense Q&A">
+        <span style="font-size: 20px;">🛡️</span>
+        <div class="presentation-chip-text">
+          <h4>Project Defense Hub</h4>
+          <p>1NF, 2NF, 3NF & Logic</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Layout -->
+  <div class="app-main">
+    <!-- Top Sticky Bar -->
+    <header class="top-bar">
+      <div class="top-bar-title">
+        <h2 id="current-view-title">Order Management & Due-Date Monitor</h2>
+        <p id="current-view-desc">Monitor upcoming deadlines, tailor assignments, and payment statuses</p>
+      </div>
+      <div class="top-bar-actions">
+        <div class="system-date-pill" title="This reference date matches your SQL sample data">
+          <span>Simulation Date:</span>
+          <strong id="display-system-date">2026-09-15</strong>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm" id="btn-reset-demo" title="Reset all records to initial SQL sample data">
+          <span>🔄 Reset Demo Data</span>
+        </button>
+        <button type="button" class="btn btn-gold" id="btn-open-new-order">
+          <span>➕ Create New Order</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content-body">
+
+      <!-- Section 7: Due-Date Alert Banner (Live Demonstration) -->
+      <section class="deadline-alert-banner" id="deadline-banner" aria-label="Approaching Deadlines Alert">
+        <div class="alert-header">
+          <div class="alert-title-wrap">
+            <div class="alert-pulse-dot"></div>
+            <h3>Approaching Deadlines & Delay Risk Monitor</h3>
+          </div>
+          <span class="urgency-badge urgency-critical" id="alert-summary-badge">1 Order Needs Immediate Attention</span>
+        </div>
+        <p class="alert-subtitle">
+          Rule: Identifies orders approaching collection date where work is still <strong>In Progress</strong> or <strong>Pending</strong>, giving the tailor time to contact customers early.
+        </p>
+
+        <div class="alert-items-grid" id="alert-items-container">
+          <!-- Populated dynamically: Order #102 is rendered here -->
+        </div>
+      </section>
+
+      <!-- KPI Metrics Overview Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <p>Total Active Orders</p>
+            <h3 id="kpi-active-orders">0</h3>
+          </div>
+          <div class="kpi-icon blue">📦</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <p>Due Within 48 Hours</p>
+            <h3 id="kpi-due-soon">0</h3>
+          </div>
+          <div class="kpi-icon orange">⏰</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <p>Ready for Collection</p>
+            <h3 id="kpi-ready-orders">0</h3>
+          </div>
+          <div class="kpi-icon green">✨</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-info">
+            <p>Outstanding Balances</p>
+            <h3 id="kpi-unpaid-balance">₦0.00</h3>
+          </div>
+          <div class="kpi-icon gold">💰</div>
+        </div>
+      </div>
+
+      <!-- ========================================================
+           TAB 1: Orders & Order Items
+           ======================================================== -->
+      <section class="tab-pane active" id="pane-orders">
+        <div class="card-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <h3>Tailoring Orders</h3>
+              <p>Relational mapping across `orders`, `order_items`, `customers`, and `payments`</p>
+            </div>
+            <div class="filters-bar">
+              <input type="text" id="filter-orders-search" class="search-input" placeholder="Search customer or order #...">
+              <select id="filter-orders-status" class="select-filter">
+                <option value="ALL">All Work Statuses</option>
+                <option value="Pending">Pending</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Ready">Ready</option>
+                <option value="Collected">Collected</option>
+                <option value="Cancelled">Cancelled</option>
+              </select>
+              <select id="filter-orders-payment" class="select-filter">
+                <option value="ALL">All Payments</option>
+                <option value="Fully Paid">Fully Paid</option>
+                <option value="Partially Paid">Partially Paid</option>
+                <option value="Unpaid">Unpaid</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table" id="table-orders">
+              <thead>
+                <tr>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Order Date</th>
+                  <th>Due Date / Timeline</th>
+                  <th>Work Status</th>
+                  <th>Financial Status</th>
+                  <th>Bill Total</th>
+                  <th>Balance</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 2: Customers & Measurements
+           ======================================================== -->
+      <section class="tab-pane" id="pane-customers" style="display: none;">
+        <div class="card-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <h3>Customer Profiles & Measurements</h3>
+              <p>Atomic customer contact records (1NF) with 1:N body measurement profiles</p>
+            </div>
+            <div class="filters-bar">
+              <input type="text" id="filter-customers-search" class="search-input" placeholder="Search customer name, phone...">
+            </div>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table" id="table-customers">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Full Name</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Address</th>
+                  <th>Latest Measurement</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="customers-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 3: Staff & Assignments (M:N)
+           ======================================================== -->
+      <section class="tab-pane" id="pane-staff" style="display: none;">
+        <div class="card-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <h3>Tailor Staff & Order Assignments</h3>
+              <p>Many-to-Many relationship resolved through the `order_staff` junction table (3NF)</p>
+            </div>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table" id="table-staff">
+              <thead>
+                <tr>
+                  <th>Staff ID</th>
+                  <th>Tailor Name</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Active Order Assignments</th>
+                </tr>
+              </thead>
+              <tbody id="staff-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 4: Payments & Ledger
+           ======================================================== -->
+      <section class="tab-pane" id="pane-payments" style="display: none;">
+        <div class="card-section">
+          <div class="section-header">
+            <div class="section-header-left">
+              <h3>Payment Transactions Ledger</h3>
+              <p>Payments recorded independently from garment production stages</p>
+            </div>
+          </div>
+
+          <div class="data-table-wrap">
+            <table class="data-table" id="table-payments">
+              <thead>
+                <tr>
+                  <th>Receipt #</th>
+                  <th>Order #</th>
+                  <th>Customer</th>
+                  <th>Payment Date</th>
+                  <th>Amount Paid</th>
+                  <th>Payment Method</th>
+                  <th>Reference Code</th>
+                </tr>
+              </thead>
+              <tbody id="payments-tbody">
+                <!-- Injected via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           TAB 5: Academic Defense & Normalization Guide
+           ======================================================== -->
+      <section class="tab-pane" id="pane-defense" style="display: none;">
+        <div class="defense-card">
+          <h4>🎓 Database Normalization Rationale (1NF, 2NF, 3NF)</h4>
+          <p style="margin-bottom: 12px; color: var(--text-secondary);">
+            Use these precise academic definitions and project examples when answering examiner questions:
+          </p>
+          <div class="form-grid" style="gap: 14px;">
+            <div style="background: #f8fafc; border: 1px solid var(--border-light); padding: 14px; border-radius: var(--radius-md);">
+              <strong style="color: #1e40af;">1NF (First Normal Form)</strong>
+              <p style="font-size: 12px; margin-top: 4px; color: #475569;">
+                <strong>Rule:</strong> Each field must contain atomic (indivisible) values with no repeating groups.<br>
+                <strong>Project Implementation:</strong> Clothing items are not stored as a single comma-separated text string ("Shirt, Trouser"). Instead, each individual garment has its own atomic row in <code>order_items</code>.
+              </p>
+            </div>
+            <div style="background: #f8fafc; border: 1px solid var(--border-light); padding: 14px; border-radius: var(--radius-md);">
+              <strong style="color: #1e40af;">2NF (Second Normal Form)</strong>
+              <p style="font-size: 12px; margin-top: 4px; color: #475569;">
+                <strong>Rule:</strong> Must be in 1NF and have no partial dependencies on composite primary keys.<br>
+                <strong>Project Implementation:</strong> Item quantity and unit price depend on the specific item, but customer details depend on the customer. Customer information is kept in <code>customers</code> and referenced via foreign keys.
+              </p>
+            </div>
+          </div>
+          <div style="margin-top: 14px; background: #f8fafc; border: 1px solid var(--border-light); padding: 14px; border-radius: var(--radius-md);">
+            <strong style="color: #1e40af;">3NF (Third Normal Form)</strong>
+            <p style="font-size: 12px; margin-top: 4px; color: #475569;">
+              <strong>Rule:</strong> Must be in 2NF and have no transitive dependencies (non-key fields must not depend on other non-key fields).<br>
+              <strong>Project Implementation:</strong> Staff names and roles depend on <code>staff_id</code>, not on an order. Therefore, staff details are stored in <code>staff</code>, and the Many-to-Many assignment is decoupled into the <code>order_staff</code> junction table.
+            </p>
+          </div>
+        </div>
+
+        <div class="defense-card">
+          <h4>💡 Presentation Flow & Defense Q&A Cheat Sheet</h4>
+          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+            <details style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);" open>
+              <summary style="font-weight: 600; cursor: pointer; color: var(--primary);">Q: Why separate payments from orders?</summary>
+              <p style="margin-top: 8px; font-size: 13px; color: #475569;">
+                <strong>Answer:</strong> Work progress (physical tailoring) and financial transactions are completely different business lifecycles. A customer can have an order that is <em>In Progress</em> while being <em>Partially Paid</em>, or an order that is <em>Ready</em> while still having an outstanding balance.
+              </p>
+            </details>
+            <details style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
+              <summary style="font-weight: 600; cursor: pointer; color: var(--primary);">Q: Why is an order_staff junction table necessary?</summary>
+              <p style="margin-top: 8px; font-size: 13px; color: #475569;">
+                <strong>Answer:</strong> Orders and Staff share a Many-to-Many (M:N) relationship. One complex agbada or suit may require a cutting master, an assembly stitcher, and an embroidery specialist. Similarly, one tailor works on multiple orders concurrently.
+              </p>
+            </details>
+            <details style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light);">
+              <summary style="font-weight: 600; cursor: pointer; color: var(--primary);">Q: How does the system solve the tailor deadline problem?</summary>
+              <p style="margin-top: 8px; font-size: 13px; color: #475569;">
+                <strong>Answer:</strong> By continuously monitoring the difference between the agreed collection date and the current date (<code>DATEDIFF(due_date, CURDATE())</code>) for any order whose status is not yet <em>Ready</em> or <em>Collected</em>. This enables proactive communication before the customer travels to the shop.
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================
+       MODAL 1: Create New Order
+       ======================================================== -->
+  <div class="modal-overlay" id="modal-new-order">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Create New Tailoring Order</h3>
+        <button type="button" class="modal-close-btn" data-close="modal-new-order">✕</button>
+      </div>
+      <form id="form-new-order">
+        <div class="modal-body">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="order-customer-select">Customer *</label>
+              <select id="order-customer-select" class="form-control" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="order-due-date">Agreed Due / Collection Date *</label>
+              <input type="date" id="order-due-date" class="form-control" required value="2026-09-20">
+            </div>
+          </div>
+
+          <div class="form-grid" style="margin-top: 14px;">
+            <div class="form-group">
+              <label for="order-clothing-type">Garment Item 1 *</label>
+              <input type="text" id="order-clothing-type" class="form-control" placeholder="e.g., 2-Piece Senator Suit" required>
+            </div>
+            <div class="form-group">
+              <label for="order-unit-price">Price (₦) *</label>
+              <input type="number" id="order-unit-price" class="form-control" placeholder="30000" min="500" required>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label for="order-garment-desc">Garment Description & Styling Notes</label>
+            <input type="text" id="order-garment-desc" class="form-control" placeholder="e.g., Slim cut, chest pocket embroidery, gold buttons">
+          </div>
+
+          <div class="form-grid" style="margin-top: 14px;">
+            <div class="form-group">
+              <label for="order-assigned-staff">Assign Primary Tailor</label>
+              <select id="order-assigned-staff" class="form-control">
+                <!-- Populated via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="order-initial-deposit">Initial Deposit Received (₦)</label>
+              <input type="number" id="order-initial-deposit" class="form-control" placeholder="0" min="0" value="0">
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label for="order-notes">Special Production Notes</label>
+            <textarea id="order-notes" class="form-control" placeholder="Customer fabric preferences or rush requests"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close="modal-new-order">Cancel</button>
+          <button type="submit" class="btn btn-gold">Save Order to Database</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 2: Order Detail & Actions Modal
+       ======================================================== -->
+  <div class="modal-overlay" id="modal-order-details">
+    <div class="modal-content" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3 id="modal-order-title">Order Details</h3>
+        <button type="button" class="modal-close-btn" data-close="modal-order-details">✕</button>
+      </div>
+      <div class="modal-body" id="modal-order-body">
+        <!-- Rendered dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close="modal-order-details">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 3: Customer Measurements Modal
+       ======================================================== -->
+  <div class="modal-overlay" id="modal-measurements">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-measurements-customer-name">Customer Measurements</h3>
+        <button type="button" class="modal-close-btn" data-close="modal-measurements">✕</button>
+      </div>
+      <div class="modal-body" id="modal-measurements-body">
+        <!-- Injected dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close="modal-measurements">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 4: Record Payment Modal
+       ======================================================== -->
+  <div class="modal-overlay" id="modal-add-payment">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>Record Payment Installment</h3>
+        <button type="button" class="modal-close-btn" data-close="modal-add-payment">✕</button>
+      </div>
+      <form id="form-record-payment">
+        <input type="hidden" id="payment-order-id">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Order Number</label>
+            <input type="text" id="payment-display-order" class="form-control" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="payment-amount">Payment Amount (₦) *</label>
+            <input type="number" id="payment-amount" class="form-control" min="100" required>
+          </div>
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="payment-method">Payment Method *</label>
+            <select id="payment-method" class="form-control">
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="POS / Card">POS / Card</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-top: 12px;">
+            <label for="payment-reference">Transaction Reference / Receipt #</label>
+            <input type="text" id="payment-reference" class="form-control" placeholder="e.g., TRX-9923-BAL">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close="modal-add-payment">Cancel</button>
+          <button type="submit" class="btn btn-gold">Record Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL 5: WhatsApp Future Enhancement Simulator
+       ======================================================== -->
+  <div class="modal-overlay" id="modal-whatsapp">
+    <div class="modal-content" style="max-width: 480px; background: #0f172a;">
+      <div class="modal-header" style="background: #0f172a; border-color: rgba(255, 255, 255, 0.1);">
+        <h3 style="color: #fff; font-size: 16px;">📱 Future Enhancement: WhatsApp Notification</h3>
+        <button type="button" class="modal-close-btn" data-close="modal-whatsapp" style="color: #94a3b8;">✕</button>
+      </div>
+      <div class="modal-body" style="padding: 16px;">
+        <div style="color: #94a3b8; font-size: 12px; margin-bottom: 14px; text-align: center;">
+          Proposal Section 8: Demonstrates how approaching deadline alerts can generate customer WhatsApp messages before due date.
+        </div>
+
+        <!-- Phone Mockup Container -->
+        <div class="whatsapp-phone-mockup">
+          <div class="whatsapp-phone-notch"></div>
+          <div class="whatsapp-header">
+            <div class="whatsapp-avatar">JD</div>
+            <div class="whatsapp-contact-info">
+              <h4 id="wa-customer-name">John Doe</h4>
+              <p id="wa-customer-phone">+234 801 234 5678</p>
+            </div>
+          </div>
+          <div class="whatsapp-chat-body">
+            <div class="whatsapp-bubble-received" id="wa-incoming-text">
+              Hello master tailor, please is my senator suit ready for tomorrow?
+              <div class="whatsapp-timestamp">10:14 AM</div>
+            </div>
+            <div class="whatsapp-bubble-sent" id="wa-bubble-message">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; display: flex; gap: 10px; justify-content: center;">
+          <a href="#" target="_blank" id="wa-open-link" class="btn btn-sm btn-gold" style="text-decoration: none;">
+            <span>💬 Open Direct in WhatsApp Web</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Core JavaScript -->
+  <script src="app.js"></script>
+</body>
+</html>
