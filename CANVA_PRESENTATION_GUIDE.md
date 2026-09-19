@@ -25,6 +25,7 @@ Upload these exact files directly from your workspace into Canva's **Uploads** t
    - Logo: `tailormate/public/images/tailormate_brand_logo.png`
    - Monogram Icon: `tailormate/public/images/tailormate_icon.png`
 2. **Problem & Atelier Reality:**
+   - The "Sitting & Waiting" Customer Crisis: `tailormate/public/images/customer_waiting_last_minute_rush.jpg` *(or root `customer_waiting_last_minute_rush.jpg`)*
    - Workshop Chaos & Manual Craft: `tailormate/public/images/workshop_reality_tailor.jpg`
    - Traditional Master Artisan: `tailormate/public/images/hero_tailor_artisan.jpg`
 3. **The Solution & Workflow:**
@@ -77,6 +78,31 @@ Upload these exact files directly from your workspace into Canva's **Uploads** t
   - Right side: Three structured cards with alert badges (Red/Amber: `#E05D52`).
 * **🎙️ Speaker Notes:**
   > *"When we visited real tailoring workshops, the core issue wasn't the artisans' skill; it was information management. Measurements get lost on scraps of paper, multi-piece orders create confusion, and tailors struggle with deadline tracking—often realizing an agbada or suit is unfinished on the exact day the customer arrives."*
+
+---
+
+### SLIDE 2B: The Real-Life Pain Point (The Scene TailorMate Eliminates)
+* **Slide Category:** Real-World Case Study / Deep Problem Hook
+* **Slide Headline:** The Scene TailorMate Was Built to Eliminate
+* **Sub-headline:** The painful reality: Customer waiting on collection day while the tailor frantically scrambles to stitch
+* **Canva Visual Layout:**
+  - **Left 50%:** Large, high-impact photo of `customer_waiting_last_minute_rush.jpg` with a dark gold frame border.
+    - Overlay caption box: *"Every tailor and customer recognizes this uncomfortable moment: An unmonitored deadline leading to a last-minute panic."*
+  - **Right 50% (Two Contrasting Cards):**
+    - **Card A (The Traditional Breakdown - Red Banner):**
+      - ❌ **No Advance Notice:** Tailor only remembers the order when the client walks in the door.
+      - ❌ **High Pressure & Poor Quality:** Frantic sewing leads to skipped stitches, broken needles, and flawed finishing.
+      - ❌ **Client Frustration:** Customer is stranded in the shop in their outfit waiting for their garment.
+    - **Card B (How TailorMate Prevents This - Gold/Green Banner):**
+      - ✅ **48h/24h Automated Deadline Radar:** The database compares `orders.due_date` against `CURDATE()` and raises visible amber alerts on the dashboard days ahead.
+      - ✅ **Workload Rebalancing:** Chief tailor sees incomplete orders in time to delegate sewing to available staff via `order_staff`.
+      - ✅ **Proactive Communication:** Tailor is prompted to notify the customer in advance if delays occur, completely eliminating surprise shop waits.
+* **🎙️ Speaker Notes (What to say during defense):**
+  > *"Take a look at this image. Almost anyone who has patronized a bespoke tailor recognizes this exact uncomfortable scene. The customer has put on their clothes and come to collect their finished outfit for an event—only to find the tailor sweating, head down, frantically trying to stitch the pieces together at the very last second while the customer is forced to sit and wait.*
+  >
+  > *Why does this happen? Not because the tailor doesn't know how to sew, but because there was zero deadline tracking. The order was buried in an old notebook.*
+  >
+  > *TailorMate exists specifically to make this scene extinct. Two days before this deadline, TailorMate's dashboard flashes: 'Order #102 is due tomorrow and is still In Progress'. The workshop manager immediately reassigns staff or contacts the customer ahead of time. The customer never has to sit on a wooden bench waiting for late clothes ever again."*
 
 ---
 
